@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Vibe Logística PRO</title>
+    <script>
+        // Função que busca dados sem dar F5 na página
+        async function atualizarPainel() {
+            try {
+                const response = await fetch('/');
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const novaTabela = doc.querySelector('tbody').innerHTML;
+                document.querySelector('tbody').innerHTML = novaTabela;
+            } catch (err) { console.log("Aguardando servidor..."); }
+        }
+        // Atualiza a cada 2 segundos para ser mais rápido que o anterior
+        setInterval(atualizarPainel, 2000);
+    </script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; text-align: center; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; }
+        h1 { color: #00ff88; letter-spacing: 2px; }
+        .btn-limpar { background: #ff4444; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 10px; overflow: hidden; }
+        th { background: #252525; color: #00ff88; padding: 15px; }
+        td { padding: 15px; border-bottom: 1px solid #252525; }
+        .badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; color: black; }
+        .status-entregue { background: #00ff88; }
+        .status-deslocamento { background: #ffbb33; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Monitoramento em Tempo Real</h1>
+        <form action="/limpar" method="post"><button type="submit" class="btn-limpar">🧹 LIMPAR TUDO</button></form>
+        <table>
+            <thead><tr><th>ID</th><th>MOTOBOY</th><th>PACOTE</th><th>STATUS</th><th>DATA</th></tr></thead>
+            <tbody>
+                {% for entrega in entregas %}
+                <tr>
+                    <td>{{ entrega['id'] }}</td>
+                    <td>{{ entrega['motoboy'] }}</td>
+                    <td>{{ entrega['pacote'] }}</td>
+                    <td><span class="badge {% if 'ENTREGUE' in entrega['status'].upper() %}status-entregue{% else %}status-deslocamento{% endif %}">{{ entrega['status'] }}</span></td>
+                    <td>{{ entrega['data'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
